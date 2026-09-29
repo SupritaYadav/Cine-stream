@@ -24,55 +24,80 @@ export default async function handler(req, res) {
     });
   }
 
-  try {
-    const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey,
-        },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [
+  const models = [
+    'gemini-3.5-flash-lite',
+    'gemini-3.5-flash',
+    'gemini-3.6-flash',
+  ];
+
+  const prompt = `Suggest ONE well-known movie based on this mood:
+${mood}
+
+Return ONLY the movie title.
+Do not include explanation, year, quotes, bullets, or extra text.`;
+
+  for (const model of models) {
+    try {
+      console.log('Trying Gemini model:', model);
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
+          body: JSON.stringify({
+            contents: [
               {
-                text:
-                  'Return exactly one well-known movie title and nothing else. No quotes, explanation, year, bullets, or extra text.',
+                role: 'user',
+                parts: [
+                  {
+                    text: prompt,
+                  },
+                ],
               },
             ],
-          },
-
-          contents: [
-            {
-              role: 'user',
-              parts: [
-                {
-                  text: `Suggest ONE movie based on this mood: ${mood}`,
-                },
-              ],
+            generationConfig: {
+              maxOutputTokens: 50,
+              temperature: 0.2,
             },
-          ],
+          }),
+        }
+      );
 
-          generationConfig: {
-            thinkingConfig: {
-              thinkingLevel: 'low',
-            },
-            maxOutputTokens: 100,
-          },
-        }),
+      const data = await response.json();
+
+      console.log(
+        'Gemini model:',
+        model,
+        'status:',
+        response.status
+      );
+
+      if (response.ok) {
+        const title = data?.candidates?.[0]?.content?.parts
+          ?.map((part) => part.text || '')
+          .join('')
+          .trim();
+
+        if (title) {
+          console.log('Gemini movie:', title);
+
+          return res.status(200).json({
+            title,
+          });
+        }
       }
-    );
 
-    const data = await response.json();
+      if (response.status === 503) {
+        console.log(
+          `${model} is temporarily unavailable. Trying next model.`
+        );
+        continue;
+      }
 
-    console.log('Gemini status:', response.status);
-    console.log(
-      'Gemini finish reason:',
-      data?.candidates?.[0]?.finishReason
-    );
-
-    if (!response.ok) {
       console.error('Gemini error:', data);
 
       return res.status(502).json({
@@ -80,32 +105,13 @@ export default async function handler(req, res) {
           data?.error?.message ||
           'Gemini API request failed.',
       });
+    } catch (error) {
+      console.error(`${model} request error:`, error);
     }
-
-    const title =
-      data?.candidates?.[0]?.content?.parts
-        ?.map((part) => part.text || '')
-        .join('')
-        .trim();
-
-    if (!title) {
-      console.error('Gemini returned no title:', data);
-
-      return res.status(502).json({
-        error: 'Gemini returned no movie title.',
-      });
-    }
-
-    console.log('Gemini movie:', title);
-
-    return res.status(200).json({
-      title,
-    });
-  } catch (error) {
-    console.error('Gemini request error:', error);
-
-    return res.status(500).json({
-      error: 'Could not contact the Gemini AI service.',
-    });
   }
+
+  return res.status(503).json({
+    error:
+      'Gemini is temporarily unavailable. Please try again shortly.',
+  });
 }

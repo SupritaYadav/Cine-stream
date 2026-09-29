@@ -63,26 +63,48 @@ export default function Home({ search, favorites, toggleFavorite, moodRequest, c
   }, [page, totalPages, loading, debouncedSearch, loadPage]);
 
   useEffect(() => {
-    if (!moodRequest) return;
-    let cancelled = false;
+  if (!moodRequest) return;
+
+  let cancelled = false;
+
+  const runMoodMatch = async () => {
     setMoodLoading(true);
     setMoodError('');
-    getMoodMovie(moodRequest)
-      .then((title) => {
-        if (!cancelled) window.location.hash = `mood:${encodeURIComponent(title)}`;
-        if (!cancelled) {
-          setMovies([]);
-          setPage(0);
-          setTotalPages(1);
-          setInitialLoading(true);
-          loadPage(1, 'search', title);
-        }
-      })
-      .catch((err) => !cancelled && setMoodError(err.message))
-      .finally(() => !cancelled && setMoodLoading(false));
-    clearMood();
-    return () => { cancelled = true; };
-  }, [moodRequest, clearMood, loadPage]);
+
+    try {
+      const title = await getMoodMovie(moodRequest);
+
+      if (cancelled) return;
+
+      window.location.hash = `mood:${encodeURIComponent(title)}`;
+
+      setMovies([]);
+      setPage(0);
+      setTotalPages(1);
+      setInitialLoading(true);
+
+      await loadPage(1, 'search', title);
+
+      if (!cancelled) {
+        clearMood();
+      }
+    } catch (err) {
+      if (!cancelled) {
+        setMoodError(err.message || 'Mood matcher failed.');
+      }
+    } finally {
+      if (!cancelled) {
+        setMoodLoading(false);
+      }
+    }
+  };
+
+  runMoodMatch();
+
+  return () => {
+    cancelled = true;
+  };
+}, [moodRequest, loadPage]);
 
   const isFavorite = (id) => favorites.some((movie) => movie.id === id);
 

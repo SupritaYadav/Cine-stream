@@ -56,7 +56,7 @@ desktop, tablet, and mobile screens.
 ---
 
 ## 📂 Project Structure
-
+```
 cine-stream/
 ├── api/
 │ └── mood.js
@@ -89,4 +89,5 @@ cine-stream/
 ├── Prompts.md
 ├── README.md
 └── vite.config.js
+```
 ---

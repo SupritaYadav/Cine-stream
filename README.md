@@ -1,43 +1,92 @@
-# Cine-Stream — Sprint 08
+# 📸 Cine-Stream
 
-A small React + Vite media explorer implementing the Sprint 08 requirements:
+Cine-Stream is a responsive movie discovery web application built as an
+internship Sprint 08 project. It uses the TMDB API to display popular
+movies, supports movie search, infinite scrolling, favorites, and an
+AI-based Mood Matcher for finding a movie based on the user's mood.
 
-- TMDB popular movies on first load
-- Search against TMDB `/search/movie`
-- 500ms search debounce
-- Infinite scroll with native `IntersectionObserver`
-- Append new pages instead of replacing the existing list
-- Favorites persisted in `localStorage`
-- `/favorites` route
-- Native image lazy loading
-- Missing-poster fallback
-- Optional AI Mood Matcher -> one movie title -> TMDB search
-- Responsive, intentionally simple UI suitable for an intern-built project
+The project is built with React and Vite and is designed to work on
+desktop, tablet, and mobile screens.
+---
 
-## Run locally
+## 🚀 Live Demo
+👉 Cine-Stream Live Website:(https://cine-stream-kiff.vercel.app/)
 
-1. Install Node.js 18+.
-2. Copy `.env.example` to `.env`.
-3. Add a TMDB Read Access Token to `VITE_TMDB_KEY`.
-4. Run:
+---
+📸 Project Screenshot & Video
+### Desktop Preview
+![Cine-Stream Preview](./public/Desktop-preview.png)
 
-```bash
-npm install
-npm run dev
-```
+### Mood-matcher Preview
+![Cine-Stream Preview](./public/mood-matcher.png)
+---
 
-For the optional Mood Matcher on a Vercel deployment, set `OPENAI_API_KEY` in Vercel Environment Variables. The `/api/mood` function keeps the OpenAI key server-side.
+## ✨ Features
 
-## Required demo checks
+- Browse popular movies from TMDB
+- Search movies with a 500ms debounce
+- Infinite scrolling using IntersectionObserver
+- Movie cards with:
+- -Poster
+- -Movie title
+- -Release year
+- -Rating
+- Favorite button
+- Favorites stored in localStorage
+- Dedicated Favorites page
+- Native lazy loading for movie posters
+- Fallback UI when a movie poster is unavailable
+- AI Mood Matcher using Gemini
+- Responsive layout for desktop, tablet, and mobile
 
-Record a short demo showing:
+---
 
-1. Popular movies load.
-2. Search typing does not fire a request for every keypress; wait 500ms after typing.
-3. Scrolling to the sentinel loads another TMDB page and appends it.
-4. Heart a movie, open Favorites, refresh, and show that it remains there.
-5. If AI is configured, submit a mood and show the returned movie flowing into TMDB search.
+##  Tech Stack
 
-## Notes
+- React
+- Vite
+- JavaScript
+- CSS
+- Axios
+- TMDB REST API
+- Google Gemini API
+- React Router
+- Local Storage
+- Vercel
+---
 
-The code is deliberately split into small files rather than over-engineered abstractions. Before submitting, read each file and make any naming/style changes you normally use so the repository reflects your own understanding and debugging work.
+## 📂 Project Structure
+
+cine-stream/
+├── api/
+│ └── mood.js
+│
+├── public/
+│
+├── src/
+│ ├── components/
+│ │ ├── LoadingGrid.jsx
+│ │ └── MovieCard.jsx
+│ │
+│ ├── hooks/
+│ │ └── useDebounce.js
+│ │
+│ ├── pages/
+│ │ ├── Favorites.jsx
+│ │ └── Home.jsx
+│ │
+│ ├── services/
+│ │ ├── mood.js
+│ │ └── tmdb.js
+│ │
+│ ├── App.jsx
+│ ├── main.jsx
+│ └── styles.css
+│
+├── .env.example
+├── .gitignore
+├── package.json
+├── Prompts.md
+├── README.md
+└── vite.config.js
+---
